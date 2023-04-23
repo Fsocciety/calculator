@@ -1,91 +1,105 @@
-const add = (a, b) => {
-    console.log(a + b);
-    return a + b;
-}
+class Calculator {
+    constructor(previousNumberElement, currentNumberElement) {
+        this.previousNumberElement = previousNumberElement;
+        this.currentNumberElement = currentNumberElement;
+        this.clear();
+    }
 
-const subtract = (a, b) => {
-    console.log(a - b);
-    return a - b;
-}
+    clear() {
+        this.currentOperand = '';
+        this.previousOperand = '';
+        this.operation = undefined;
+    }
+    
+    delete() {
+        this.currentOperand = this.currentOperand.toString().slice(0, -1)
+    }
 
-const multiply = (a, b) => {
-    console.log(a * b);
-    return a * b;
-}
+    appendNumber(number) {
+        if (number === '.' && this.currentOperand.includes('.')) return;
+        this.currentOperand = this.currentOperand.toString() + number.toString();
+    }
 
-const divide = (a, b) => {
-    console.log(a / b);
-    return a / b;
-}
+    chooseOperation(operation) {
+        if (this.currentOperand === '') return;
+        if (this.previousOperand !== '') {
+            this.compute();
+        }
+        this.operation = operation;
+        this.previousOperand = this.currentOperand;
+        this.currentOperand = '';
+    }
 
-const operate = (operator, a, b) => {
-    switch (operator) {
-        case "+":
-            add(a, b);
-            break;
-        case "-":
-            subtract(a, b);
-            break;
-        case "x":
-            multiply(a, b);
-            break;
-        case "÷":
-            divide(a, b);
-            break;
-        default:
-            console.log("error operator");
-            break;
+    compute() {
+        let computation;
+        const prev = parseFloat(this.previousOperand);
+        const current = parseFloat(this.currentOperand);
+        if (isNaN(prev) || isNaN(current)) return;
+        switch(this.operation) {
+            case '+':
+                computation = prev + current;
+                break;
+            case '-':
+                computation = prev - current;
+                break;
+            case '*':
+                computation = prev - current;
+                break;
+            case '÷':
+                computation = prev / current;
+                break;
+            default:
+                return;
+        }
+        this.currentOperand = computation;
+        this.operation = undefined;
+        this.previousOperand = '';
+    }
+    
+    updateDisplay() {
+        this.currentNumberElement.innerText = this.currentOperand;
+        if (this.operation != null) {
+            this.previousNumberElement.innerText = `${this.previousOperand} ${this.operation}`;
+        }
+        
     }
 }
 
-let currentNumber;
-let previousNumber;
-
-let num = document.querySelectorAll('.num');
-let operator = document.querySelectorAll('.operator');
+let numbers = document.querySelectorAll('.num');
+let operations = document.querySelectorAll('.operator');
 let currentNumberElement = document.querySelector('.current-number');
 let previousNumberElement = document.querySelector('.previous-number');
-let deleteBtn = document.querySelector('.delete');
+let deleteAll = document.querySelector('.delete');
+let clear = document.querySelector('.clear');
 let equals = document.querySelector('.equals');
 
+const calculator = new Calculator(previousNumberElement, currentNumberElement);
 
-num.forEach(number => {
-    number.addEventListener('click', () => {
-        appendNumber(number.innerText)
-        updateDisplay();
+numbers.forEach(num => {
+    num.addEventListener("click", () => {
+        calculator.appendNumber(num.innerText);
+        calculator.updateDisplay();
     });
 });
 
-
-operator.forEach(op => {
-    op.addEventListener('click', () => {
-        chooseOperation(op.innerText);
-        updateDisplay();
+operations.forEach(op => {
+    op.addEventListener("click", () => {
+        calculator.chooseOperation(op.innerText);
+        calculator.updateDisplay();
     });
 });
 
-equals.addEventListener('click', () => {
-    
-    updateDisplay();
+equals.addEventListener("click", () => {
+    calculator.compute();
+    calculator.updateDisplay();
 });
 
-deleteBtn.addEventListener('click', () => clear());
+deleteAll.addEventListener("click", () => {
+  calculator.clear();
+  calculator.updateDisplay();
+});
 
-const clear = () => {
-    currentNumberElement.innerText = "";
-    previousNumberElement.innerText = "";
-}
-
-const appendNumber = (number) => {
-    currentNumberElement.innerText += number;
-    currentNumber = currentNumberElement.innerText;
-}
-
-const chooseOperation = (operation) => {
-    previousNumber = currentNumber;
-    currentNumber = "";
-    console.log(previousNumber, currentNumber);
-}
-
-const updateDisplay = () => { 
-}
+clear.addEventListener("click", () => {
+    calculator.delete();
+    calculator.updateDisplay();
+});
